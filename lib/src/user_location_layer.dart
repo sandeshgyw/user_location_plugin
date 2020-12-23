@@ -51,9 +51,9 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
 
   @override
   void dispose() {
-    super.dispose();
     _cancel(_onLocationChangedStreamSubscription);
     _cancel(_compassStreamSubscription);
+    super.dispose();
   }
 
   void _cancel(StreamSubscription streamSubscription) {
