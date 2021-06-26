@@ -17,10 +17,7 @@ import android.os.Bundle
 
 class UserLocationPlugin: MethodCallHandler {
   companion object {
-      var listener: LocationListener? = null
-      var locationManager: LocationManager? = null
-
-              @JvmStatic
+    @JvmStatic
     fun registerWith(registrar: Registrar) {
       val channel = MethodChannel(registrar.messenger(), "user_location")
       channel.setMethodCallHandler(UserLocationPlugin())
@@ -30,7 +27,7 @@ class UserLocationPlugin: MethodCallHandler {
      eventChannel.setStreamHandler(
             object: StreamHandler {
                 override fun onListen(p0: Any?, p1: EventSink) {
-                    listener = object : LocationListener {
+                    val listener = object : LocationListener {
                         override fun onLocationChanged(location: android.location.Location) {
                         }
 
@@ -47,14 +44,13 @@ class UserLocationPlugin: MethodCallHandler {
                         }
                     }
 
-                    locationManager = registrar.activeContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                    locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    val locationManager = registrar.activeContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                             2000,
                             10f, listener)
 
                 }
                 override fun onCancel(p0: Any?) {
-                    locationManager?.removeUpdates(listener)
                 }
             }
      )
