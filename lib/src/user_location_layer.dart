@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -22,7 +24,7 @@ class MapsPluginLayer extends StatefulWidget {
 }
 
 class _MapsPluginLayerState extends State<MapsPluginLayer>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   LatLng _currentLocation;
   Marker _locationMarker;
   EventChannel _stream = EventChannel('locationStatusStream');
@@ -35,10 +37,12 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
 
   StreamSubscription<LocationData> _onLocationChangedStreamSubscription;
   StreamSubscription<double> _compassStreamSubscription;
+  StreamSubscription _locationStatusChangeSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     initialStateOfupdateMapLocationOnPositionChange =
         widget.options.updateMapLocationOnPositionChange;
@@ -51,6 +55,8 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _locationStatusChangeSubscription?.cancel();
     _onLocationChangedStreamSubscription?.cancel();
     _compassStreamSubscription?.cancel();
     super.dispose();
@@ -63,20 +69,53 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
     }
   }
 
-  void initialize() {
-    location.hasPermission().then((status) async {
-      if (status != PermissionStatus.granted) {
-        await location.requestPermission();
-        location.serviceEnabled().then((enabled) async {
-          if (!enabled) {
-            await location.requestService();
-          }
-        });
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+        if (Platform.isAndroid) {
+          _locationStatusChangeSubscription?.cancel();
+        }
+        _onLocationChangedStreamSubscription?.cancel();
+        break;
+      case AppLifecycleState.resumed:
+        if (Platform.isAndroid) {
+          _handleLocationStatusChanges();
+          _subscribeToLocationChanges();
+        } else {
+          _onLocationChangedStreamSubscription?.resume();
+        }
+        break;
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  void initialize() async {
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
       }
-      _handleLocationChanges();
-      _subscribeToLocationChanges();
-      _handleCompassDirection();
-    });
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    _handleLocationStatusChanges();
+    _subscribeToLocationChanges();
+    _handleCompassDirection();
   }
 
   void printLog(String log) {
@@ -206,11 +245,12 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
     }
   }
 
-  void _handleLocationChanges() {
+  void _handleLocationStatusChanges() {
     printLog(_stream.toString());
     bool _locationStatusChanged;
     if (_locationStatusChanged == null) {
-      _stream.receiveBroadcastStream().listen((onData) {
+      _locationStatusChangeSubscription =
+          _stream.receiveBroadcastStream().listen((onData) {
         _locationStatusChanged = onData;
         printLog("LOCATION ACCESS CHANGED: CURRENT-> ${onData ? 'On' : 'Off'}");
         if (onData == false) {
