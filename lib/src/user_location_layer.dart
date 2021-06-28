@@ -155,7 +155,12 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
 
     printLog("OnSubscribe to location change");
     var location = Location();
+
     if (await location.requestService()) {
+      debugPrint('*************************');
+      debugPrint(
+          '_subscribeToLocationChanges: await location.requestService()');
+      debugPrint('*************************');
       _onLocationChangedStreamSubscription =
           location.onLocationChanged.listen((onValue) {
         _addsMarkerLocationToMarkerLocationStream(onValue);
