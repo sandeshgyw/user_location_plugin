@@ -42,10 +42,6 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
   @override
   void initState() {
     super.initState();
-    debugPrint('*************************');
-    debugPrint('initState');
-    debugPrint('*************************');
-
     WidgetsBinding.instance.addObserver(this);
 
     initialStateOfupdateMapLocationOnPositionChange =
@@ -59,10 +55,6 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
 
   @override
   void dispose() {
-    debugPrint('*************************');
-    debugPrint('dispose');
-    debugPrint('*************************');
-
     WidgetsBinding.instance.removeObserver(this);
     _locationStatusChangeSubscription?.cancel();
     _onLocationChangedStreamSubscription?.cancel();
@@ -79,10 +71,6 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    debugPrint('*************************');
-    debugPrint('didChangeAppLifecycleState($state)');
-    debugPrint('*************************');
-
     super.didChangeAppLifecycleState(state);
     switch (state) {
       case AppLifecycleState.inactive:
@@ -106,22 +94,12 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
   }
 
   void initialize() async {
-    debugPrint('*************************');
-    debugPrint('initialize');
-    debugPrint('*************************');
-
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
 
     _serviceEnabled = await location.serviceEnabled();
-    debugPrint('*************************');
-    debugPrint('initialize: _serviceEnabled=$_serviceEnabled');
-    debugPrint('*************************');
 
     _serviceEnabled = await location.requestService();
-    debugPrint('*************************');
-    debugPrint('initialize: requested again anyway');
-    debugPrint('*************************');
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
       if (!_serviceEnabled) {
@@ -149,18 +127,10 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
   }
 
   Future<void> _subscribeToLocationChanges() async {
-    debugPrint('*************************');
-    debugPrint('_subscribeToLocationChanges');
-    debugPrint('*************************');
-
     printLog("OnSubscribe to location change");
     var location = Location();
 
     if (await location.requestService()) {
-      debugPrint('*************************');
-      debugPrint(
-          '_subscribeToLocationChanges: await location.requestService()');
-      debugPrint('*************************');
       _onLocationChangedStreamSubscription =
           location.onLocationChanged.listen((onValue) {
         _addsMarkerLocationToMarkerLocationStream(onValue);
@@ -264,10 +234,6 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
   }
 
   void _moveMapToCurrentLocation({double zoom}) {
-    debugPrint('*************************');
-    debugPrint('_moveMapToCurrentLocation($zoom)');
-    debugPrint('*************************');
-
     if (_currentLocation != null) {
       animatedMapMove(
           LatLng(_currentLocation.latitude ?? LatLng(0, 0),
@@ -283,10 +249,6 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
   }
 
   void _handleLocationStatusChanges() {
-    debugPrint('*************************');
-    debugPrint('_handleLocationStatusChanges');
-    debugPrint('*************************');
-
     printLog(_stream.toString());
     bool _locationStatusChanged;
     if (_locationStatusChanged == null) {
