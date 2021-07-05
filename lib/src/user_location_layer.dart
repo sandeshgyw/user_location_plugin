@@ -97,6 +97,8 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
 
+    await location.enableBackgroundMode(enable: false);
+
     _serviceEnabled = await location.serviceEnabled();
 
     _serviceEnabled = await location.requestService();
