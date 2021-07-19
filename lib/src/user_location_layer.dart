@@ -5,7 +5,7 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:user_location/src/user_location_marker.dart';
 import 'package:user_location/src/user_location_options.dart';
-import 'package:latlong/latlong.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -35,7 +35,8 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
   double _direction;
 
   StreamSubscription<LocationData> _onLocationChangedStreamSubscription;
-  StreamSubscription<double> _compassStreamSubscription;
+  StreamSubscription<CompassEvent>
+      _compassStreamSubscription; //maybe compas event was double
   StreamSubscription _locationStatusChangeSubscription;
 
   @override
@@ -247,10 +248,11 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
 
   void _handleCompassDirection() {
     if (widget.options.showHeading) {
-      _compassStreamSubscription =
-          FlutterCompass.events.listen((double direction) {
+      _compassStreamSubscription = FlutterCompass.events.listen((onData) {
+        //maybe ondata was double direction
+        //maybe onData
         setState(() {
-          _direction = direction;
+          _direction = onData.heading; //maybe ondata.heading was direction
         });
         forceMapUpdate();
       });
