@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:location/location.dart';
 
 class UserLocationOptions extends LayerOptions {
   BuildContext context;
   List<Marker> markers;
   MapController mapController;
+
+  LatLng currentLocation;
 
   Widget markerWidget;
   bool updateMapLocationOnPositionChange;
@@ -55,5 +58,6 @@ class UserLocationOptions extends LayerOptions {
       this.zoomToCurrentLocationOnLoad: false,
       this.showHeading: true,
       this.locationUpdateInBackground: true,
-      this.locationUpdateIntervalMs: 1000});
+      this.locationUpdateIntervalMs: 1000,
+      this.currentLocation});
 }

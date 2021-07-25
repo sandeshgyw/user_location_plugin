@@ -217,6 +217,8 @@ class _MapsPluginLayerState extends State<MapsPluginLayer>
 
   void _moveMapToCurrentLocation({double zoom}) {
     if (_currentLocation != null) {
+      widget.options.currentLocation = _currentLocation;
+
       animatedMapMove(
         LatLng(_currentLocation.latitude ?? LatLng(0, 0),
             _currentLocation.longitude ?? LatLng(0, 0)),
